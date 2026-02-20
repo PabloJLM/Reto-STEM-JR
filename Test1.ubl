@@ -1,0 +1,17 @@
+module Test1
+author unknown
+version 1 0 
+description ''
+variables Distancia minimo maximo Lecturas NeoPixeles red green blue 
+
+  spec 'r' 'Distancia' 'Distancia'
+
+to Distancia {
+  forever {
+    sayIt 'Distancia (cm) :' ('distance (cm)' 2 4)
+    Distancia = ('distance (cm)' 2 4)
+    waitMillis 10
+  }
+  return Distancia
+}
+

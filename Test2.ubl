@@ -1,0 +1,66 @@
+module Test2
+author unknown
+version 1 0 
+description ''
+variables Distancia minimo maximo Lecturas NeoPixeles red green blue 
+
+  spec ' ' 'Dist NeoPixel' 'Dist NeoPixel'
+  spec ' ' 'Leer Distancia' 'Leer Distancia'
+  spec ' ' 'Medir' 'Medidas _ Frecuencia (ms) _' 'auto auto' 10 1000
+
+to 'Dist NeoPixel' {
+  NeoPixeles = 3
+  neoPixelAttach NeoPixeles 25
+  forever {
+    Distancia = ('distance (cm)' 2 4)
+    waitMillis 100
+    sayIt Distancia
+    if (Distancia >= 200) {
+      neoPixelSetAllToColor (colorFromRGB 255 0 0)
+    } (and (Distancia < 200) (Distancia > 100)) {
+      neoPixelSetAllToColor (colorFromRGB 255 255 0)
+    } (and (Distancia < 100) (Distancia > 50)) {
+      neoPixelSetAllToColor (colorFromRGB 0 255 0)
+    } (and (Distancia < 50) (Distancia > 25)) {
+      neoPixelSetAllToColor (colorFromRGB 0 255 100)
+    } else {
+      neoPixelSetAllToColor (colorFromRGB 255 0 255)
+    }
+  }
+}
+
+to 'Leer Distancia' {
+  forever {
+    sayIt 'Distancia (cm) :' ('distance (cm)' 2 4)
+    Distancia = ('distance (cm)' 2 4)
+    waitMillis 10
+  }
+}
+
+to Medir Lecturas Freq {
+  Lecturas = Lecturas
+  comment 'crear lista'
+  local 'lista' (newList Lecturas)
+  atPut 'all' lista 0
+  comment 'Recorrer lista y poner lecturas'
+  for i Lecturas {
+    atPut i lista ('distance (cm)' 2 4)
+    waitMillis Freq
+    sayIt 'Medidas:' ('[data:joinStrings]' lista ',')
+  }
+  comment 'Definir minimos y maximos iniciales'
+  minimo = (at 1 lista)
+  maximo = (at 1 lista)
+  comment 'Encontrar minimo'
+  for i Lecturas {
+    if ((at i lista) < minimo) {minimo = (at i lista)}
+  }
+  comment 'Encontrar maximo'
+  for i Lecturas {
+    if ((at i lista) > maximo) {maximo = (at i lista)}
+  }
+  sayIt 'Medidas: ' Lecturas '
+Min: ' minimo '
+Max: ' maximo
+}
+
