@@ -1,0 +1,241 @@
+module main
+author unknown
+version 1 0 
+description ''
+variables umbral velocidad 
+
+  spec ' ' 'Adelante' 'Adelante _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'Atras' 'Atras _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'Derecha' 'Giro  derecha _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'testing' 'testing'
+  spec ' ' 'Apagar' 'Apagar'
+  spec ' ' 'Giro 90 izquierda' 'Giro  izquierda _ Velocidad M1 _ Velocidad M2 _' 'auto auto auto' 10 1023 1023
+  spec 'r' 'Sensor_Der' 'Sensor_Der'
+  spec 'r' 'Sensor_Izq' 'Sensor_Izq'
+  spec 'r' 'Ultrasonico' 'Ultrasonico'
+
+to Adelante tiempo vel vel2 {
+  comment 'Va hacia adelante N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 true
+    digitalWriteOp 19 false
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 true
+    digitalWriteOp 16 false
+    analogWriteOp 9 vel2
+    waitMillis 1000
+  }
+}
+
+to Apagar {
+  digitalWriteOp 7 false
+  digitalWriteOp 19 false
+  digitalWriteOp 15 false
+  digitalWriteOp 16 false
+  analogWriteOp 6 0
+  analogWriteOp 9 0
+}
+
+to Atras tiempo vel vel2 {
+  comment 'Va hacia atras N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 false
+    digitalWriteOp 19 true
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 false
+    digitalWriteOp 16 true
+    analogWriteOp 9 vel2
+    waitMillis 1000
+  }
+}
+
+to Derecha tiempo vel vel2 {
+  comment 'Va hacia la derecha N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 true
+    digitalWriteOp 19 false
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 false
+    digitalWriteOp 16 true
+    analogWriteOp 9 vel2
+    waitMillis 1000
+  }
+}
+
+to 'Giro 90 izquierda' tiempo vel vel2 {
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 false
+    digitalWriteOp 19 true
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 true
+    digitalWriteOp 16 false
+    analogWriteOp 9 vel2
+    waitMillis 1000
+  }
+}
+
+to Sensor_Der {
+  local 'der' (analogReadOp 3)
+  return der
+}
+
+to Sensor_Izq {
+  local 'izq' (analogReadOp 4)
+  return izq
+}
+
+to Ultrasonico {
+  return ('distance (cm)' 14 13)
+}
+
+to testing {
+  sayIt 'Comenzando prueba de JR'
+  waitMillis 2500
+  sayIt 'Llendo hacia adelante 3 segundos'
+  Adelante 2 1023 1023
+  sayIt 'Movimiento hacia adelante finalizado'
+  waitMillis 1500
+  sayIt 'Llendo hacia atras 3 segundos'
+  Atras 2 1023 1023
+  sayIt 'Movimiento hacia atras finalizado'
+  waitMillis 1500
+  sayIt 'Llendo a la izquierda 3 segundos'
+  'Giro 90 izquierda' 2 1023 1023
+  waitMillis 1500
+  sayIt 'Movimiento a la izquierda finalizado'
+  waitMillis 1500
+  sayIt 'Llendo a la derecha 3 segundos'
+  Derecha 2 1023 1023
+  waitMillis 1500
+  sayIt 'Movimiento a la derecha finalizado'
+  waitMillis 1500
+  Apagar
+  sayIt 'Prueba Finalizada!'
+}
+
+script 744 40 {
+testing
+}
+
+script 40 63 {
+to Adelante {}
+}
+
+script 807 84 {
+forever {
+  waitMillis 200
+  sayIt (Sensor_Izq) (Sensor_Der)
+}
+}
+
+script 322 219 {
+whenStarted
+forever {
+  sayIt (Ultrasonico)
+  if ((Ultrasonico) <= 15) {
+    Atras 1 1023 1023
+    if ((random 1 2) == 1) {
+      Derecha 1 1023 1023
+    } else {
+      'Giro 90 izquierda' 1 1023 1023
+    }
+  } else {
+    Adelante 1 1023 1023
+  }
+}
+}
+
+script 40 486 {
+to Apagar {}
+}
+
+script 40 705 {
+to Atras {}
+}
+
+script 40 1128 {
+to Derecha {}
+}
+
+script 40 1551 {
+to 'Giro 90 izquierda' {}
+}
+
+script 40 1947 {
+to Sensor_Der {}
+}
+
+script 40 2069 {
+to Sensor_Izq {}
+}
+
+script 55 2233 {
+to Ultrasonico {}
+}
+
+
+module 'Distance (HC-SR04)' Input
+author MicroBlocks
+version 1 5 
+tags sensor 'hc-sr04' distance ultrasound 
+description 'Support for the HC-SR04 ultrasound distance sensor.
+
+Originally written by Joan Guillén & Josep Ferràndiz.
+Rewritten to use the new pulse capture mechanism.'
+variables _sr04_last _sr04_misses 
+
+  spec 'r' 'distance (cm)' 'distance (cm) trigger _ echo _' 'num num' 2 4
+  spec 'r' 'sr04_distanceOnePin' 'distance (cm) pin _' 'num' 0
+  spec 'r' '_sr04_getEchoData' '_getEchoData _ echo _' 'auto auto' 0 1
+
+to '_sr04_getEchoData' trig echo {
+  comment 'Output a 50 usec pulse on trigger pin to
+start distance measurement.'
+  digitalWriteOp trig false
+  waitMicros 2
+  digitalWriteOp trig true
+  waitMicros 50
+  digitalWriteOp trig false
+  comment 'Capture the distance pulse. Width of
+pulse is proportional to the distance.'
+  '[sensors:captureStart]' echo
+  local 'start' (millisOp)
+  repeatUntil (('[sensors:captureCount]') >= 2) {
+    if ((millisSince start) > 24) {exitLoop}
+    waitMillis 1
+  }
+  return ('[sensors:captureEnd]')
+}
+
+to 'distance (cm)' trig echo {
+  comment 'Take a distance measurement. Pulses will be two element
+list if successful. If no echo detected it will have only one
+element. In rare error cases the second item will be negative.'
+  local 'pulses' ('_sr04_getEchoData' trig echo)
+  if (and ((size pulses) >= 2) ((at 2 pulses) > 0)) {
+    _sr04_misses = 0
+    comment 'The divisor was determined empirically. It is
+less than the expected 2 * 343 meter/sec.'
+    _sr04_last = ((10 * (at 2 pulses)) / 583)
+    return _sr04_last
+  } else {
+    comment 'No echo, probably because target is out of range.
+To avoid short-term glitches, return the last distance
+unless the are N misses in a row, then return 400.'
+    _sr04_misses += 1
+    return (ifExpression (_sr04_misses < 10) _sr04_last 400)
+  }
+}
+
+to sr04_distanceOnePin pin {
+  return ('distance (cm)' pin pin)
+}
+
