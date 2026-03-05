@@ -1,0 +1,123 @@
+module Motores_microbit
+author unknown
+version 1 0 
+description ''
+variables umbral velocidad 
+
+  spec ' ' 'Adelante' 'Adelante _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'Atras' 'Atras _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'Derecha' 'Giro  derecha _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'testing' 'testing'
+  spec ' ' 'Apagar' 'Apagar'
+  spec ' ' 'Giro 90 izquierda' 'Giro  izquierda _ Velocidad M1 _ Velocidad M2 _' 'auto auto auto' 10 1023 1023
+  spec 'r' 'Sensor_Der' 'Sensor_Der'
+  spec 'r' 'Sensor_Izq' 'Sensor_Izq'
+  spec 'r' 'Ultrasonico' 'Ultrasonico'
+
+to Adelante tiempo vel vel2 {
+  comment 'Va hacia adelante N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 true
+    digitalWriteOp 19 false
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 true
+    digitalWriteOp 16 false
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to Apagar {
+  digitalWriteOp 7 false
+  digitalWriteOp 19 false
+  digitalWriteOp 15 false
+  digitalWriteOp 16 false
+  analogWriteOp 6 0
+  analogWriteOp 9 0
+}
+
+to Atras tiempo vel vel2 {
+  comment 'Va hacia atras N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 false
+    digitalWriteOp 19 true
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 false
+    digitalWriteOp 16 true
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to Derecha tiempo vel vel2 {
+  comment 'Va hacia la derecha N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 true
+    digitalWriteOp 19 false
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 false
+    digitalWriteOp 16 true
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to 'Giro 90 izquierda' tiempo vel vel2 {
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 false
+    digitalWriteOp 19 true
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 true
+    digitalWriteOp 16 false
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to Sensor_Der {
+  local 'der' (analogReadOp 3)
+  return der
+}
+
+to Sensor_Izq {
+  local 'izq' (analogReadOp 4)
+  return izq
+}
+
+to Ultrasonico {
+  return ('distance (cm)' 14 13)
+}
+
+to testing {
+  sayIt 'Comenzando prueba de JR'
+  waitMillis 2500
+  sayIt 'Llendo hacia adelante 3 segundos'
+  Adelante 2 1023 1023
+  sayIt 'Movimiento hacia adelante finalizado'
+  waitMillis 1500
+  sayIt 'Llendo hacia atras 3 segundos'
+  Atras 2 1023 1023
+  sayIt 'Movimiento hacia atras finalizado'
+  waitMillis 1500
+  sayIt 'Llendo a la izquierda 3 segundos'
+  'Giro 90 izquierda' 2 1023 1023
+  waitMillis 1500
+  sayIt 'Movimiento a la izquierda finalizado'
+  waitMillis 1500
+  sayIt 'Llendo a la derecha 3 segundos'
+  Derecha 2 1023 1023
+  waitMillis 1500
+  sayIt 'Movimiento a la derecha finalizado'
+  waitMillis 1500
+  Apagar
+  sayIt 'Prueba Finalizada!'
+}
+

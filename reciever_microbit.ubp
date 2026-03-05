@@ -1,0 +1,189 @@
+module main
+author unknown
+version 1 0 
+description ''
+variables 'robot-command' 
+
+script 87 40 {
+whenStarted
+'[radio:setGroup]' 10
+}
+
+script 88 154 {
+whenCondition ('[radio:messageReceived]')
+if (('[radio:receivedInteger]') == 1) {
+  comment 'idle'
+  Apagar
+} (('[radio:receivedInteger]') == 2) {
+  comment 'fw'
+  Adelante 1 1023 1023
+} (('[radio:receivedInteger]') == 3) {
+  Atras 1 1023 1023
+} (('[radio:receivedInteger]') == 4) {
+  'Giro 90 izquierda' 1 1023 1023
+} (('[radio:receivedInteger]') == 5) {
+  Derecha 1 1023 1023
+} else {
+  Apagar
+}
+}
+
+script 551 289 {
+comment 'Idle - 1
+
+fw - 2
+
+back - 3
+
+izq - 4
+
+der - 5
+
+se debe cambiar el grupo xd'
+}
+
+
+module Motores_microbit
+author unknown
+version 1 0 
+description ''
+variables umbral velocidad 
+
+  spec ' ' 'Adelante' 'Adelante _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'Atras' 'Atras _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'Derecha' 'Giro  derecha _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'testing' 'testing'
+  spec ' ' 'Apagar' 'Apagar'
+  spec ' ' 'Giro 90 izquierda' 'Giro  izquierda _ Velocidad M1 _ Velocidad M2 _' 'auto auto auto' 10 1023 1023
+  spec 'r' 'Sensor_Der' 'Sensor_Der'
+  spec 'r' 'Sensor_Izq' 'Sensor_Izq'
+  spec 'r' 'Ultrasonico' 'Ultrasonico'
+
+to Adelante tiempo vel vel2 {
+  comment 'Va hacia adelante N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 true
+    digitalWriteOp 19 false
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 true
+    digitalWriteOp 16 false
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to Apagar {
+  digitalWriteOp 7 false
+  digitalWriteOp 19 false
+  digitalWriteOp 15 false
+  digitalWriteOp 16 false
+  analogWriteOp 6 0
+  analogWriteOp 9 0
+}
+
+to Atras tiempo vel vel2 {
+  comment 'Va hacia atras N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 false
+    digitalWriteOp 19 true
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 false
+    digitalWriteOp 16 true
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to Derecha tiempo vel vel2 {
+  comment 'Va hacia la derecha N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 true
+    digitalWriteOp 19 false
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 false
+    digitalWriteOp 16 true
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to 'Giro 90 izquierda' tiempo vel vel2 {
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 false
+    digitalWriteOp 19 true
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 true
+    digitalWriteOp 16 false
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to Sensor_Der {
+  local 'der' (analogReadOp 3)
+  return der
+}
+
+to Sensor_Izq {
+  local 'izq' (analogReadOp 4)
+  return izq
+}
+
+to Ultrasonico {
+  return ('distance (cm)' 14 13)
+}
+
+to testing {
+  sayIt 'Comenzando prueba de JR'
+  waitMillis 2500
+  sayIt 'Llendo hacia adelante 3 segundos'
+  Adelante 2 1023 1023
+  sayIt 'Movimiento hacia adelante finalizado'
+  waitMillis 1500
+  sayIt 'Llendo hacia atras 3 segundos'
+  Atras 2 1023 1023
+  sayIt 'Movimiento hacia atras finalizado'
+  waitMillis 1500
+  sayIt 'Llendo a la izquierda 3 segundos'
+  'Giro 90 izquierda' 2 1023 1023
+  waitMillis 1500
+  sayIt 'Movimiento a la izquierda finalizado'
+  waitMillis 1500
+  sayIt 'Llendo a la derecha 3 segundos'
+  Derecha 2 1023 1023
+  waitMillis 1500
+  sayIt 'Movimiento a la derecha finalizado'
+  waitMillis 1500
+  Apagar
+  sayIt 'Prueba Finalizada!'
+}
+
+
+module Radio Comm
+author MicroBlocks
+version 1 3 
+tags radio communication messaging network 
+description 'Send and receive messages between micro:bit boards via their built-in radio system.'
+
+  spec ' ' '[radio:sendInteger]' 'radio send number _' 'num' 123
+  spec ' ' '[radio:sendString]' 'radio send string _' 'str' 'Hello!'
+  spec ' ' '[radio:sendPair]' 'radio send pair _ = _' 'str num' 'light' 10
+  spec 'r' '[radio:messageReceived]' 'radio message received?'
+  spec 'r' '[radio:receivedInteger]' 'radio last number'
+  spec 'r' '[radio:receivedString]' 'radio last string'
+  spec ' ' '[radio:setGroup]' 'radio set group _ (0-255)' 'num' 0
+  spec ' ' '[radio:setPower]' 'radio set power (0-7) _' 'num' 4
+  advanced
+  spec 'r' '[radio:signalStrength]' 'radio last signal strength'
+  spec 'r' '[radio:lastMessageID]' 'radio last sender ID'
+  spec 'r' '[radio:deviceID]' 'radio my ID'
+  spec 'r' '[radio:receivedMessageType]' 'radio last message type'
+  spec ' ' '[radio:setChannel]' 'radio set channel (0-83) _' 'num' 7
