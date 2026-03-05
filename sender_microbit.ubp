@@ -43,7 +43,7 @@ state = 'der'
 repeatUntil (state != 'der') {
   '[display:mbDisplay]' 4488452
   waitMillis 100
-  '[radio:sendInteger]' 5
+  '[radio:sendInteger]' 4
 }
 }
 
@@ -53,7 +53,7 @@ state = 'izq'
 repeatUntil (state != 'izq') {
   '[display:mbDisplay]' 4291652
   waitMillis 100
-  '[radio:sendInteger]' 4
+  '[radio:sendInteger]' 5
 }
 }
 
