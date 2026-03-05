@@ -1,0 +1,411 @@
+module main
+author unknown
+version 1 0 
+description ''
+variables 'octo-msg' 'robot-command' 
+
+script 51 40 {
+whenStarted
+octo-msg = (booleanConstant false)
+robot-command = 'stop'
+}
+
+script 451 53 {
+whenBroadcastReceived 'octo;circle'
+robot-command = 'fw'
+repeatUntil (robot-command != 'fw') {
+  Adelante 1 1023 1023
+}
+Apagar
+}
+
+script 43 271 {
+whenCondition (octoBeamReceived)
+octo-msg = (octoLastBeam)
+sendBroadcast octo-msg
+sayIt octo-msg
+}
+
+script 447 272 {
+whenBroadcastReceived 'octo;triangle'
+robot-command = 'back'
+repeatUntil (robot-command != 'back') {
+  Atras 1 1023 1023
+}
+Apagar
+}
+
+script 58 457 {
+whenBroadcastReceived 'octo;square'
+robot-command = 'stop'
+repeatUntil (robot-command != 'stop') {
+  Apagar
+}
+}
+
+script 462 512 {
+whenBroadcastReceived 'octo;star'
+robot-command = 'izq'
+repeatUntil (robot-command != 'izq') {
+  'Giro 90 izquierda' 1 1023 1023
+}
+Apagar
+}
+
+script 56 649 {
+whenBroadcastReceived 'octo;heart'
+robot-command = 'der'
+repeatUntil (robot-command != 'der') {
+  Derecha 1 1023 1023
+}
+Apagar
+}
+
+
+module 'LED Display' Output
+author MicroBlocks
+version 1 14 
+choices led_imageMenu heart 'small heart' yes no happy sad confused angry asleep surprised silly fabulous meh 't-shirt' 'roller skate' duck house tortoise butterfly 'stick figure' ghost sword giraffe skull umbrella snake rabbit cow 'quarter note' 'eight note' pitchfork target triangle 'left triangle' 'chess board' diamond 'small diamond' square 'small square' scissors 
+description 'Display primitives for the 5x5 LED display on the BBC micro:bit, Calliope mini and M5Atom Matrix. Boards with TFT displays (such as the Citilab ED1 or the M5Stack family) support these primitives with a simulated "fat pixel" display.
+'
+variables _stop_scrolling_text 
+
+  spec ' ' '[display:mbDisplay]' 'display _' 'microbitDisplay' 15237440
+  spec ' ' 'led_displayImage' 'display image _ : x _ y _' 'menu.led_imageMenu num num' 'happy' 1 1
+  spec ' ' '[display:mbDisplayOff]' 'clear display'
+  space
+  spec ' ' '[display:mbPlot]' 'plot x _ y _' 'num num' 3 3
+  spec ' ' '[display:mbUnplot]' 'unplot x _ y _' 'num num' 3 3
+  space
+  spec ' ' 'displayCharacter' 'display character _' 'str' 'A'
+  spec ' ' 'scroll_text' 'scroll text _ : pausing _ ms' 'str num' 'HELLO ROSA!' 100
+  spec ' ' 'stopScrollingText' 'stop scrolling'
+  advanced
+  spec ' ' 'set display color' 'set display color _' 'color'
+  spec 'r' 'led_image' 'LED image #BR# _' 'microbitDisplay' 15237440
+  space
+  spec 'r' '_led_namedImage' '_led_namedImage _' 'menu.led_imageMenu' 'happy'
+  spec 'r' '_led_imageData' '_led_imageData'
+
+to '_led_imageData' {
+  return 'heart:4685802,small heart:145728,yes:2269696,no:18157905,happy:15237440,sad:18284864,confused:22348096,angry:23036241,asleep:459616,surprised:4526090,silly:25984017,fabulous:15008639,meh:2236443,t-shirt:15154043,roller skate:11534104,duck:489702,house:10976708,tortoise:359872,butterfly:29332475,stick figure:18158564,ghost:23068334,sword:4657284,giraffe:10946627,skull:15171246,umbrella:6460398,snake:469859,rabbit:16104613,cow:4685361,quarter note:7573636,eight note:7590276,pitchfork:4357813,target:4681156,triangle:1026176,left triangle:32805985,chess board:11184810,diamond:4539716,small diamond:141440,square:33080895,small square:469440,scissors:20287859,'
+}
+
+to '_led_namedImage' name {
+  local 'data' ('_led_imageData')
+  local 'i' ('[data:find]' name data)
+  if (i == -1) {
+    comment 'Name not found'
+    return 0
+  }
+  local 'start' (('[data:find]' ':' data i) + 1)
+  local 'end' (('[data:find]' ',' data i) - 1)
+  return ('[data:convertType]' ('[data:copyFromTo]' data start end) 'number')
+}
+
+to displayCharacter s {
+  s = ('[data:join]' '' s)
+  if ((size s) == 0) {
+    '[display:mbDisplayOff]'
+    return 0
+  }
+  '[display:mbDrawShape]' ('[display:mbShapeForLetter]' (at 1 s)) 1 1
+}
+
+to led_displayImage imageName optionalX optionalY {
+  local 'image' imageName
+  if (isType image 'string') {
+    image = ('_led_namedImage' imageName)
+  }
+  '[display:mbDrawShape]' image (argOrDefault 2 1) (argOrDefault 3 1)
+}
+
+to led_image twentyFiveBitInt {
+  comment 'An LED image is a 25-bit integer'
+  return twentyFiveBitInt
+}
+
+to scroll_text text optionalDelay {
+  text = ('[data:join]' '' text)
+  local 'delay' 100
+  if ((pushArgCount) > 1) {
+    delay = optionalDelay
+  }
+  _stop_scrolling_text = (booleanConstant false)
+  if ('Pico:ed' == (boardType)) {
+    for position (((size text) * 6) + 18) {
+      if _stop_scrolling_text {return 0}
+      '[display:mbDisplayOff]'
+      '[tft:text]' text (17 - position) 0 (colorSwatch 125 125 125 255) 1 true
+      waitMillis (delay / 2)
+    }
+  } ('kidsIOT' == (boardType)) {
+    for position (((size text) * 6) + 21) {
+      if _stop_scrolling_text {return 0}
+      '[tft:deferUpdates]'
+      '[tft:clear]'
+      '[tft:text]' text (128 - (6 * position)) 6 (colorSwatch 255 255 255 255) 6 false
+      '[tft:resumeUpdates]'
+      waitMillis (delay / 8)
+    }
+  } else {
+    for position (((size text) * 6) + 6) {
+      if _stop_scrolling_text {return 0}
+      for i (size text) {
+        '[display:mbDrawShape]' ('[display:mbShapeForLetter]' ('[data:unicodeAt]' i text)) (((i * 6) + 2) - position) 1
+      }
+      waitMillis delay
+    }
+  }
+}
+
+to 'set display color' color {
+  '[display:mbSetColor]' color
+}
+
+to stopScrollingText {
+  _stop_scrolling_text = (booleanConstant true)
+  waitMillis 10
+  '[display:mbDisplayOff]'
+}
+
+
+module Motores_microbit
+author unknown
+version 1 0 
+description ''
+variables umbral velocidad 
+
+  spec ' ' 'Adelante' 'Adelante _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'Atras' 'Atras _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'Derecha' 'Giro  derecha _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
+  spec ' ' 'testing' 'testing'
+  spec ' ' 'Apagar' 'Apagar'
+  spec ' ' 'Giro 90 izquierda' 'Giro  izquierda _ Velocidad M1 _ Velocidad M2 _' 'auto auto auto' 10 1023 1023
+  spec 'r' 'Sensor_Der' 'Sensor_Der'
+  spec 'r' 'Sensor_Izq' 'Sensor_Izq'
+  spec 'r' 'Ultrasonico' 'Ultrasonico'
+
+to Adelante tiempo vel vel2 {
+  comment 'Va hacia adelante N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 true
+    digitalWriteOp 19 false
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 true
+    digitalWriteOp 16 false
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to Apagar {
+  digitalWriteOp 7 false
+  digitalWriteOp 19 false
+  digitalWriteOp 15 false
+  digitalWriteOp 16 false
+  analogWriteOp 6 0
+  analogWriteOp 9 0
+}
+
+to Atras tiempo vel vel2 {
+  comment 'Va hacia atras N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 false
+    digitalWriteOp 19 true
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 false
+    digitalWriteOp 16 true
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to Derecha tiempo vel vel2 {
+  comment 'Va hacia la derecha N segundos'
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 true
+    digitalWriteOp 19 false
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 false
+    digitalWriteOp 16 true
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to 'Giro 90 izquierda' tiempo vel vel2 {
+  for i tiempo {
+    comment 'M1'
+    digitalWriteOp 7 false
+    digitalWriteOp 19 true
+    analogWriteOp 6 vel
+    comment 'M2'
+    digitalWriteOp 15 true
+    digitalWriteOp 16 false
+    analogWriteOp 9 vel2
+    waitMillis 250
+  }
+}
+
+to Sensor_Der {
+  local 'der' (analogReadOp 3)
+  return der
+}
+
+to Sensor_Izq {
+  local 'izq' (analogReadOp 4)
+  return izq
+}
+
+to Ultrasonico {
+  return ('distance (cm)' 14 13)
+}
+
+to testing {
+  sayIt 'Comenzando prueba de JR'
+  waitMillis 2500
+  sayIt 'Llendo hacia adelante 3 segundos'
+  Adelante 2 1023 1023
+  sayIt 'Movimiento hacia adelante finalizado'
+  waitMillis 1500
+  sayIt 'Llendo hacia atras 3 segundos'
+  Atras 2 1023 1023
+  sayIt 'Movimiento hacia atras finalizado'
+  waitMillis 1500
+  sayIt 'Llendo a la izquierda 3 segundos'
+  'Giro 90 izquierda' 2 1023 1023
+  waitMillis 1500
+  sayIt 'Movimiento a la izquierda finalizado'
+  waitMillis 1500
+  sayIt 'Llendo a la derecha 3 segundos'
+  Derecha 2 1023 1023
+  waitMillis 1500
+  sayIt 'Movimiento a la derecha finalizado'
+  waitMillis 1500
+  Apagar
+  sayIt 'Prueba Finalizada!'
+}
+
+
+module OctoStudio Comm
+author wwj718
+version 1 11 
+choices octo_shapes 'octo;circle' 'octo;square' 'octo;star' 'octo;heart' 'octo;triangle' 'octo;clover' 'octo;diamond' 'octo;moon' 
+description 'Communicate with OctoStudio (https://octostudio.org/)
+'
+variables _octoGroup _octoLastBeamShape _octoLastBeamGroup _octoShapes _octoIsBeaming 
+
+  spec ' ' 'octoSendBeam' 'Octo beam to phones _ : duration _ ms : group _' 'menu.octo_shapes num num' 'octo;heart' 200 0
+  space
+  spec 'r' 'octoBeamReceived' 'Octo beam received?'
+  spec 'r' 'octoLastBeam' 'Octo last beam'
+  spec 'r' 'octoLastGroup' 'Octo last beam group'
+  space
+  spec ' ' 'octoSetGroup' 'Octo set group _ (0-99)' 'auto' 0
+  space
+  spec ' ' '_octoInit' '_octoInit'
+  spec 'r' '_octoShapeForID' '_octoShapeForID _' 'num' 1
+  spec 'r' '_octoMakeMessage' '_octoMakeMessage _' 'menu.octo_shapes' 'octo;heart'
+  spec 'r' '_octoHexDigit' '_octoHexDigit _' 'num' 10
+
+to '_octoHexDigit' n {
+  return (at ((n & 15) + 1) '0123456789ABCDEF')
+}
+
+to '_octoInit' {
+  if (_octoShapes == 0) {_octoShapes = ('[data:makeList]' 'octo;circle' 'octo;square' 'octo;star' 'octo;heart' 'octo;triangle' 'octo;clover' 'octo;diamond' 'octo;moon')}
+}
+
+to '_octoMakeMessage' shape group {
+  comment 'Mimic iOS, eg: ECA7059C00000001'
+  '_octoInit'
+  local 'result' ('[data:makeList]')
+  repeat 8 {
+    '[data:addLast]' (at 'random' '0123456789ABCDEF') result
+  }
+  repeat 4 {
+    '[data:addLast]' 0 result
+  }
+  local 'shapeNum' (('[data:find]' shape _octoShapes) - 1)
+  if (shapeNum < 0) {
+    if (isType shape 'number') {
+      shapeNum = shape
+    } else {
+      return 'Unknown shape'
+    }
+  }
+  comment 'Add group as two hexadecimal digits.'
+  '[data:addLast]' ('_octoHexDigit' ((group >> 4) & 15)) result
+  '[data:addLast]' ('_octoHexDigit' (group & 15)) result
+  comment 'Allow for up to 256 shapes encoded as two hexadecimal digits.'
+  '[data:addLast]' ('_octoHexDigit' ((shapeNum >> 4) & 15)) result
+  '[data:addLast]' ('_octoHexDigit' (shapeNum & 15)) result
+  return ('[data:joinStrings]' result)
+}
+
+to '_octoShapeForID' id {
+  '_octoInit'
+  if (and (0 <= id) (id < (size _octoShapes))) {
+    return (at (id + 1) _octoShapes)
+  }
+  comment 'If id is out of the shape range, return it as a number.'
+  return id
+}
+
+to octoBeamReceived {
+  comment 'Return true if a new beam has been received. Use "Octo last beam" to get its value.'
+  local 'newBeam' ('[ble:octoReceive]')
+  if (newBeam == (booleanConstant false)) {
+    return (booleanConstant false)
+  }
+  local 'beamGroup' ((newBeam >> 8) & 255)
+  if (or ('' == _octoGroup) (beamGroup == _octoGroup)) {
+    _octoLastBeamShape = ('_octoShapeForID' (newBeam & 255))
+    _octoLastBeamGroup = beamGroup
+    return (booleanConstant true)
+  }
+  return (booleanConstant false)
+}
+
+to octoLastBeam {
+  comment 'Return the name of the last shape received.'
+  if (_octoLastBeamShape == 0) {
+    return 'None'
+  }
+  return _octoLastBeamShape
+}
+
+to octoLastGroup {
+  comment 'Return the group of the last beam received.'
+  if (_octoLastBeamShape == 0) {
+    return -1
+  }
+  return _octoLastBeamGroup
+}
+
+to octoSendBeam shape optionalDuration optionalGroup {
+  local 'duration' (argOrDefault 2 500)
+  local 'group' (argOrDefault 3 ('[data:convertType]' _octoGroup 'number'))
+  if (_octoIsBeaming == 1) {
+    sayIt 'waiting...'
+    waitUntil (_octoIsBeaming == 0)
+    sayIt ''
+  }
+  _octoIsBeaming = 1
+  '[ble:octoStartBeam]' ('_octoMakeMessage' shape group)
+  waitMillis duration
+  '[ble:octoStopBeam]'
+  _octoIsBeaming = 0
+}
+
+to octoSetGroup group {
+  _octoGroup = group
+}
+
