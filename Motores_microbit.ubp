@@ -13,6 +13,7 @@ variables umbral velocidad
   spec 'r' 'Sensor_Der' 'Sensor_Der'
   spec 'r' 'Sensor_Izq' 'Sensor_Izq'
   spec 'r' 'Ultrasonico' 'Ultrasonico'
+  spec ' ' 'Calibracion IR' 'Calibracion IR'
 
 to Adelante tiempo vel vel2 {
   comment 'Va hacia adelante N segundos'
@@ -50,6 +51,58 @@ to Atras tiempo vel vel2 {
     digitalWriteOp 16 true
     analogWriteOp 9 vel2
     waitMillis 250
+  }
+}
+
+to 'Calibracion IR' {
+  local 'lecturas_IR' (newList 10)
+  sayIt 'Empezando calibracion de sensores IR
+Debes apuntar el umbral que quede'
+  waitMillis 3000
+  sayIt 'Instrucciones'
+  waitMillis 1500
+  sayIt 'Coloca el robot en una superficie blanca'
+  waitMillis 1500
+  sayIt 'Presiona el boton A para calibrar el sensor izquierdo'
+  waitMillis 1500
+  sayIt 'Presiona el boton B para calibrar el sensor derecho'
+  waitMillis 1500
+  sayIt 'Presiona el boton que quieras: '
+  waitUntil (or (buttonA) (buttonB))
+  if (buttonA) {
+    sayIt 'Elegiste el sensor izquierdo '
+    waitMillis 1500
+    sayIt 'Se toman 10 lecturas del color blanco'
+    for i 10 {
+      atPut i lecturas_IR (Sensor_Izq)
+      sayIt 'Lecturas: ' i 'Valor: ' (at i lecturas_IR)
+      waitMillis 500
+    }
+    waitMillis 1500
+    for i 10 {
+      local 'suma' (suma + (at i lecturas_IR))
+    }
+    local 'promedio' (suma / 10)
+    sayIt 'Total: ' suma 'Umbral Izquierdo:' promedio
+    waitMillis 1500
+  } (buttonB) {
+    sayIt 'Elegiste el sensor derecho '
+    waitMillis 1500
+    sayIt 'Se toman 10 lecturas del color blanco'
+    for i 10 {
+      atPut i lecturas_IR (Sensor_Der)
+      sayIt 'Lecturas: ' i 'Valor: ' (at i lecturas_IR)
+      waitMillis 500
+    }
+    waitMillis 1500
+    for i 10 {
+      local 'suma' (suma + (at i lecturas_IR))
+    }
+    local 'promedio' (suma / 10)
+    sayIt 'Total: ' suma 'Umbral derecho: ' promedio
+    waitMillis 1500
+  } else {
+    sayIt 'ERROR'
   }
 }
 
@@ -121,64 +174,9 @@ to testing {
   sayIt 'Prueba Finalizada!'
 }
 
-script 744 40 {
-testing
-}
-
-script 40 63 {
-to Adelante {}
-}
-
-script 807 84 {
-forever {
-  waitMillis 200
-  sayIt (Sensor_Izq) (Sensor_Der)
-}
-}
-
-script 322 219 {
+script 544 40 {
 whenStarted
-forever {
-  sayIt (Ultrasonico)
-  if ((Ultrasonico) <= 15) {
-    Atras 1 1023 1023
-    if ((random 1 2) == 1) {
-      Derecha 1 1023 1023
-    } else {
-      'Giro 90 izquierda' 1 1023 1023
-    }
-  } else {
-    Adelante 1 1023 1023
-  }
-}
-}
-
-script 40 486 {
-to Apagar {}
-}
-
-script 40 705 {
-to Atras {}
-}
-
-script 40 1128 {
-to Derecha {}
-}
-
-script 40 1551 {
-to 'Giro 90 izquierda' {}
-}
-
-script 40 1947 {
-to Sensor_Der {}
-}
-
-script 40 2069 {
-to Sensor_Izq {}
-}
-
-script 55 2233 {
-to Ultrasonico {}
+'Calibracion IR'
 }
 
 
