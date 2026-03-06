@@ -147,12 +147,14 @@ Realiza una secuencia automática para verificar el funcionamiento de los motore
 
 Secuencia de prueba:
 
-1. Adelante durante 2 segundos
-2. Atrás durante 2 segundos
-3. Giro a la izquierda durante 2 segundos
-4. Giro a la derecha durante 2 segundos
+1. Adelante durante 2 segundos  
+2. Atrás durante 2 segundos  
+3. Giro a la izquierda durante 2 segundos  
+4. Giro a la derecha durante 2 segundos  
 
-Esta función permite validar conexiones, direcciones de giro y funcionamiento del puente H.
+Esta función permite verificar las conexiones, las direcciones de giro y el funcionamiento del puente H. 
+También se utiliza para ajustar los valores de PWM de los motores, ya que el robot no cuenta con sensores de retroalimentación. 
+Debido a pequeñas diferencias entre motores, puede ser necesario calibrar los valores de velocidad para que el robot avance o retroceda en línea recta.
 
 ---
 
