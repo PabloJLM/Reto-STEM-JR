@@ -41,11 +41,11 @@ El robot utiliza una placa **micro:bit** como controlador principal del sistema.
 ## Componentes principales
 
 - micro:bit
-- Driver de motores tipo puente H
+- Driver de motores - **tb6612fng**
 - 2 motores DC con caja reductora
-- Sensor ultrasónico
-- Sensores infrarrojos (IR)
-- Sensores Sharp de distancia (pendiente de integración)
+- Sensor ultrasónico - **hc-sr04**
+- Sensores infrarrojos (IR) - **qre 113**
+- Sensores Sharp de distancia (pendiente de integración) - **GP2Y0A41SK0F**
 - Neopixel (pendiente de integración)
 - Chasis robótico tipo carrito
 - Sistema de alimentación
