@@ -1,4 +1,4 @@
-# Reto STEM JR (Proyecto BALAM)
+# Proyecto BALAM - Reto STEM JR 
 
 STEM JR es un carrito robótico educativo diseñado para introducir a estudiantes en conceptos fundamentales de robótica, programación y sistemas embebidos utilizando la placa micro:bit y el entorno de programación MicroBlocks. El proyecto forma parte del **Reto STEM JR**, una categoría educativa dentro de **Proyecto BALAM – Encuentro Nacional de Robótica de Guatemala**, cuyo objetivo es fomentar el aprendizaje práctico de tecnologías STEM en estudiantes de nivel escolar.
 
