@@ -14,6 +14,7 @@ variables umbral velocidad
   spec 'r' 'Sensor_Izq' 'Sensor_Izq'
   spec 'r' 'Ultrasonico' 'Ultrasonico'
   spec ' ' 'Calibracion IR' 'Calibracion IR'
+  spec ' ' 'Calibracion Ultrasonico' 'Verificacion Ultrasonico _' 'auto' '10'
 
 to Adelante tiempo vel vel2 {
   comment 'Va hacia adelante N segundos'
@@ -106,6 +107,37 @@ Debes apuntar el umbral que quede'
   }
 }
 
+to 'Calibracion Ultrasonico' Distancia {
+  local 'lecturas_u' (newList 10)
+  sayIt 'Empezando calibracion de sensor ultrasonico'
+  waitMillis 3000
+  sayIt 'Instrucciones'
+  waitMillis 1500
+  sayIt 'Coloca el robot a 5 cm de un obstaculo'
+  waitMillis 1500
+  sayIt 'Presiona el boton A cuando estes listo'
+  waitMillis 1500
+  waitUntil (buttonA)
+  sayIt 'Se toman 10 lecturas a ' Distancia ' cm'
+  for i 10 {
+    atPut i lecturas_u (Ultrasonico)
+    sayIt 'Lecturas: ' i 'Valor: ' (at i lecturas_u)
+    waitMillis 500
+  }
+  waitMillis 1500
+  for i 10 {
+    local 'suma' (suma + (at i lecturas_u))
+  }
+  local 'promedio' (suma / 10)
+  sayIt 'Total: ' suma 'Distancia' promedio
+  waitMillis 1500
+  sayIt 'Se aproxima a la medida de  ' Distancia ' ?'
+  waitMillis 3000
+  sayIt 'Si esta entre +-2 cm se encuentra funcional'
+  waitMillis 1500
+  sayIt 'Si son cambios extremos, reportalo al staff'
+}
+
 to Derecha tiempo vel vel2 {
   comment 'Va hacia la derecha N segundos'
   for i tiempo {
@@ -174,9 +206,16 @@ to testing {
   sayIt 'Prueba Finalizada!'
 }
 
-script 544 40 {
+script 327 40 {
 whenStarted
-'Calibracion IR'
+}
+
+script 40 143 {
+to 'Calibracion IR' {}
+}
+
+script 558 149 {
+to 'Calibracion Ultrasonico' {}
 }
 
 
