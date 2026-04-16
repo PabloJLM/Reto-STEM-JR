@@ -16,19 +16,19 @@ if (('[radio:receivedInteger]') == 1) {
   Apagar
 } (('[radio:receivedInteger]') == 2) {
   comment 'fw'
-  Adelante 1 1023 1023
+  Adelante 1 512 512
 } (('[radio:receivedInteger]') == 3) {
-  Atras 1 1023 1023
+  Atras 1 512 512
 } (('[radio:receivedInteger]') == 4) {
-  'Giro 90 izquierda' 1 1023 1023
+  'Giro 90 izquierda' 1 512 512
 } (('[radio:receivedInteger]') == 5) {
-  Derecha 1 1023 1023
+  Derecha 1 512 512
 } else {
   Apagar
 }
 }
 
-script 551 289 {
+script 617 385 {
 comment 'Idle - 1
 
 fw - 2

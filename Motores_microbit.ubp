@@ -15,6 +15,7 @@ variables umbral velocidad
   spec 'r' 'Ultrasonico' 'Ultrasonico'
   spec ' ' 'Calibracion IR' 'Calibracion IR'
   spec ' ' 'Calibracion Ultrasonico' 'Verificacion Ultrasonico _' 'auto' '10'
+  spec ' ' 'Calibracion Motores' 'Calibracion M2 _' 'auto' 10
 
 to Adelante tiempo vel vel2 {
   comment 'Va hacia adelante N segundos'
@@ -107,6 +108,20 @@ Debes apuntar el umbral que quede'
   }
 }
 
+to 'Calibracion Motores' duracion {
+  comment '1. poner el robot en un espacio abierto
+2. se presiona cualquier boton
+3. empieza caminando 3 segundos a media potencia
+4. empieza con incrementos en el motor 2
+5. vuelve a media 
+6. empieza con incrementos en el motor 1 '
+  Adelante duracion 512 512
+  waitMillis 1500
+  Adelante duracion 512 532
+  waitMillis 1500
+  Adelante duracion 512 552
+}
+
 to 'Calibracion Ultrasonico' Distancia {
   local 'lecturas_u' (newList 10)
   sayIt 'Empezando calibracion de sensor ultrasonico'
@@ -168,12 +183,12 @@ to 'Giro 90 izquierda' tiempo vel vel2 {
 }
 
 to Sensor_Der {
-  local 'der' (analogReadOp 3)
+  local 'der' (analogReadOp 4)
   return der
 }
 
 to Sensor_Izq {
-  local 'izq' (analogReadOp 4)
+  local 'izq' (analogReadOp 3)
   return izq
 }
 
@@ -206,16 +221,12 @@ to testing {
   sayIt 'Prueba Finalizada!'
 }
 
-script 327 40 {
+script 40 40 {
+to 'Calibracion Motores' {}
+}
+
+script 584 121 {
 whenStarted
-}
-
-script 40 143 {
-to 'Calibracion IR' {}
-}
-
-script 558 149 {
-to 'Calibracion Ultrasonico' {}
 }
 
 

@@ -10,6 +10,7 @@ comment 'Z+ - adelante
 Z- - atras
 X+ - derecha
 X- - izquierda'
+waitMillis 100
 state = 'idle'
 repeatUntil (state != 'idle') {
   '[display:mbDisplay]' 15237440
@@ -29,6 +30,7 @@ se debe cambiar el grupo xd'
 
 script 336 170 {
 whenCondition (('[sensors:tiltZ]') >= 50)
+waitMillis 100
 state = 'fw'
 repeatUntil (state != 'fw') {
   '[display:mbDisplay]' 4347332
@@ -39,6 +41,7 @@ repeatUntil (state != 'fw') {
 
 script 623 180 {
 whenCondition (('[sensors:tiltX]') >= 50)
+waitMillis 100
 state = 'der'
 repeatUntil (state != 'der') {
   '[display:mbDisplay]' 4488452
@@ -47,8 +50,14 @@ repeatUntil (state != 'der') {
 }
 }
 
-script 43 482 {
+script 618 512 {
+whenStarted
+'[radio:setGroup]' 10
+}
+
+script 43 520 {
 whenCondition (('[sensors:tiltX]') <= -50)
+waitMillis 100
 state = 'izq'
 repeatUntil (state != 'izq') {
   '[display:mbDisplay]' 4291652
@@ -57,19 +66,15 @@ repeatUntil (state != 'izq') {
 }
 }
 
-script 326 497 {
+script 327 523 {
 whenCondition (('[sensors:tiltZ]') <= -50)
+waitMillis 100
 state = 'back'
 repeatUntil (state != 'back') {
   '[display:mbDisplay]' 4674692
   waitMillis 100
   '[radio:sendInteger]' 3
 }
-}
-
-script 618 512 {
-whenStarted
-'[radio:setGroup]' 10
 }
 
 
