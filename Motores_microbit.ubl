@@ -2,7 +2,7 @@ module Motores_microbit
 author unknown
 version 1 0 
 description ''
-variables umbral velocidad 
+variables umbral velocidad Octomsg 
 
   spec ' ' 'Adelante' 'Adelante _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
   spec ' ' 'Atras' 'Atras _ Velocidad M1 0-1023 _ Velocidad M2 0-1023 _' 'auto auto auto' 10 1023 1023
@@ -13,6 +13,11 @@ variables umbral velocidad
   spec 'r' 'Sensor_Der' 'Sensor_Der'
   spec 'r' 'Sensor_Izq' 'Sensor_Izq'
   spec 'r' 'Ultrasonico' 'Ultrasonico'
+  spec ' ' 'Calibracion IR' 'Calibracion IR'
+  spec ' ' 'Calibracion Ultrasonico' 'Verificacion Ultrasonico _' 'auto' '10'
+  spec ' ' 'Calib M1' 'Calib M1 _' 'auto' 5
+  spec ' ' 'Calib M2' 'Calib M2 _' 'auto' '10'
+  spec ' ' 'OctoInit' 'OctoInit _' 'auto' 0
 
 to Adelante tiempo vel vel2 {
   comment 'Va hacia adelante N segundos'
@@ -53,6 +58,111 @@ to Atras tiempo vel vel2 {
   }
 }
 
+to 'Calib M1' Duracion {
+  OctoInit 0
+  playMIDIKey 100 1000
+  for i 10 {
+    Adelante Duracion 512 (i * 102)
+    sayIt (i * 102)
+    octoSendBeam 'octo;circle'
+    waitMillis 500
+  }
+}
+
+to 'Calib M2' Duracion {
+  OctoInit 0
+  playMIDIKey 100 1000
+  for i 10 {
+    Adelante Duracion 512 (i * 102)
+    sayIt (i * 102)
+    octoSendBeam 'octo;triangle'
+    waitMillis 500
+  }
+}
+
+to 'Calibracion IR' {
+  local 'lecturas_IR' (newList 10)
+  sayIt 'Empezando calibracion de sensores IR
+Debes apuntar el umbral que quede'
+  waitMillis 3000
+  sayIt 'Instrucciones'
+  waitMillis 1500
+  sayIt 'Coloca el robot en una superficie blanca'
+  waitMillis 1500
+  sayIt 'Presiona el boton A para calibrar el sensor izquierdo'
+  waitMillis 1500
+  sayIt 'Presiona el boton B para calibrar el sensor derecho'
+  waitMillis 1500
+  sayIt 'Presiona el boton que quieras: '
+  waitUntil (or (buttonA) (buttonB))
+  if (buttonA) {
+    sayIt 'Elegiste el sensor izquierdo '
+    waitMillis 1500
+    sayIt 'Se toman 10 lecturas del color blanco'
+    for i 10 {
+      atPut i lecturas_IR (Sensor_Izq)
+      sayIt 'Lecturas: ' i 'Valor: ' (at i lecturas_IR)
+      waitMillis 500
+    }
+    waitMillis 1500
+    for i 10 {
+      local 'suma' (suma + (at i lecturas_IR))
+    }
+    local 'promedio' (suma / 10)
+    sayIt 'Total: ' suma 'Umbral Izquierdo:' promedio
+    waitMillis 1500
+  } (buttonB) {
+    sayIt 'Elegiste el sensor derecho '
+    waitMillis 1500
+    sayIt 'Se toman 10 lecturas del color blanco'
+    for i 10 {
+      atPut i lecturas_IR (Sensor_Der)
+      sayIt 'Lecturas: ' i 'Valor: ' (at i lecturas_IR)
+      waitMillis 500
+    }
+    waitMillis 1500
+    for i 10 {
+      local 'suma' (suma + (at i lecturas_IR))
+    }
+    local 'promedio' (suma / 10)
+    sayIt 'Total: ' suma 'Umbral derecho: ' promedio
+    waitMillis 1500
+  } else {
+    sayIt 'ERROR'
+  }
+}
+
+to 'Calibracion Ultrasonico' Distancia {
+  local 'lecturas_u' (newList 10)
+  sayIt 'Empezando calibracion de sensor ultrasonico'
+  waitMillis 3000
+  sayIt 'Instrucciones'
+  waitMillis 1500
+  sayIt 'Coloca el robot a 5 cm de un obstaculo'
+  waitMillis 1500
+  sayIt 'Presiona el boton A cuando estes listo'
+  waitMillis 1500
+  waitUntil (buttonA)
+  sayIt 'Se toman 10 lecturas a ' Distancia ' cm'
+  for i 10 {
+    atPut i lecturas_u (Ultrasonico)
+    sayIt 'Lecturas: ' i 'Valor: ' (at i lecturas_u)
+    waitMillis 500
+  }
+  waitMillis 1500
+  for i 10 {
+    local 'suma' (suma + (at i lecturas_u))
+  }
+  local 'promedio' (suma / 10)
+  sayIt 'Total: ' suma 'Distancia' promedio
+  waitMillis 1500
+  sayIt 'Se aproxima a la medida de  ' Distancia ' ?'
+  waitMillis 3000
+  sayIt 'Si esta entre +-2 cm se encuentra funcional'
+  waitMillis 1500
+  sayIt 'Si son cambios extremos, reportalo al staff'
+}
+
 to Derecha tiempo vel vel2 {
   comment 'Va hacia la derecha N segundos'
   for i tiempo {
@@ -82,13 +192,19 @@ to 'Giro 90 izquierda' tiempo vel vel2 {
   }
 }
 
+to OctoInit Grupo {
+  octoSetGroup Grupo
+  Octomsg = (booleanConstant false)
+  waitUntil (or (buttonA) (buttonB))
+}
+
 to Sensor_Der {
-  local 'der' (analogReadOp 3)
+  local 'der' (analogReadOp 4)
   return der
 }
 
 to Sensor_Izq {
-  local 'izq' (analogReadOp 4)
+  local 'izq' (analogReadOp 3)
   return izq
 }
 
